@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { PopulationModule } from './population/population.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Country } from './countries/country.entity';
+import { Country } from './entity/country.entity';
 import { CountryModule } from './country/country.module';
 
 @Module({
@@ -9,7 +9,7 @@ import { CountryModule } from './country/country.module';
     PopulationModule,
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: 'local_mysql',
+      host: 'localhost',
       port: 3306,
       username: 'myuser',
       password: 'mypassword',

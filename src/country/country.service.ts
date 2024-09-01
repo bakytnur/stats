@@ -1,47 +1,38 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Country } from 'src/countries/country.entity';
-import { DataSource } from 'typeorm';
+import { Country } from 'src/entity/country.entity';
+import { CountryRepository } from './country.repository';
+import { CountryDto } from 'src/dto/country.dto';
 
 @Injectable()
 export class CountryService {
-  constructor(
-    @InjectRepository(Country)
-    private countryRepository: Repository<Country>,
-    private dataSource: DataSource,
-  ) {}
+  constructor(private countryRepository: CountryRepository) {}
 
   findAll(): Promise<Country[]> {
-    return this.countryRepository.find();
+    return this.countryRepository.findAll();
   }
 
   findOne(id: number): Promise<Country | null> {
-    return this.countryRepository.findOneBy({ id });
+    return this.countryRepository.findOne(id);
   }
 
   async remove(id: number): Promise<void> {
-    await this.countryRepository.delete(id);
+    await this.countryRepository.remove(id);
   }
 
-  async createMany(countries: Country[]) {
-    const queryRunner = this.dataSource.createQueryRunner();
+  async add(country: CountryDto) {
+    const entity = new Country();
+    entity.name = country.name;
+    entity.fullname = country.fullName;
+    entity.continentId = country.continent;
+    await this.countryRepository.create(entity);
+  }
 
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-    try {
-      for (const country of countries) {
-        await queryRunner.manager.save(country);
-      }
-
-      await queryRunner.commitTransaction();
-    } catch (err) {
-      console.error(err);
-      // since we have errors lets rollback the changes we made
-      await queryRunner.rollbackTransaction();
-    } finally {
-      // you need to release a queryRunner which was manually instantiated
-      await queryRunner.release();
-    }
+  async update(country: CountryDto) {
+    const entity = new Country();
+    entity.id = country.id;
+    entity.name = country.name;
+    entity.fullname = country.fullName;
+    entity.continentId = country.continent;
+    await this.countryRepository.update(entity);
   }
 }
